@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,25 +13,53 @@ namespace TicTacToe
 {
     public partial class Form1 : Form
     {
-        //X is represented as 1 and O is represented as -1 in the following code
+        //X is represented as 1 and O is represented as -1
         private DataGridView ticTacToeTable = new DataGridView();
         private Label gameStatusDisplay = new Label();
-        private int[,] currentGameState = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
-        private int currentTurn = 1;
-        private bool gameOver = false;
+        private TextBox gameLog = new TextBox(), gameStats = new TextBox();
         private Button resetButton = new Button();
-        private Button newGameButton = new Button();
 
+        private Queue lastTenGames = new Queue();
+        private int[,] currentGameState = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+        private int currentTurn = 1, logCount = 1;
+        private bool gameOver = false, gameStarted = false;
+        
         public Form1()
         {
             int tableWidth = 550, tableHeight = 465;
 
-            gameStatusDisplay.Font = new Font("Arial", 25);
+            gameStatusDisplay.Font = new Font("Arial", 25, FontStyle.Bold);
             gameStatusDisplay.Size = new Size(tableWidth, 50);
-            gameStatusDisplay.Location = new Point(5, 0);
-            gameStatusDisplay.Text = "X's turn.";
+            gameStatusDisplay.Location = new Point(5, 5);
+            gameStatusDisplay.Text = "X's Turn";
             gameStatusDisplay.TextAlign = ContentAlignment.MiddleCenter;
             Controls.Add(gameStatusDisplay);
+
+            gameLog.ReadOnly = true;
+            gameLog.Font = new Font("Arial", 10);
+            gameLog.Size = new Size(170, tableHeight - 55);
+            gameLog.Location = new Point(10 + tableWidth, 55);
+            gameLog.Text = "[1]: ";
+            gameLog.TextAlign = HorizontalAlignment.Left;
+            gameLog.Multiline = true;
+            Controls.Add(gameLog);
+
+            gameStats.ReadOnly = true;
+            gameStats.Font = new Font("Arial", 10);
+            gameStats.Size = new Size(170, 70);
+            gameStats.Location = new Point(10 + tableWidth, tableHeight);
+            UpdateGameStats();
+            gameStats.TextAlign = HorizontalAlignment.Left;
+            gameStats.Multiline = true;
+            Controls.Add(gameStats);
+
+            resetButton.Font = new Font("Arial", 12);
+            resetButton.Size = new Size(170, 50);
+            resetButton.Location = new Point(10 + tableWidth, 0);
+            resetButton.Text = "Reset Game";
+            resetButton.TextAlign = ContentAlignment.MiddleCenter;
+            resetButton.Click += ResetButtonClicked;
+            Controls.Add(resetButton);
 
             ticTacToeTable.ColumnCount = 3;
             ticTacToeTable.ColumnHeadersVisible = false;
@@ -44,20 +73,21 @@ namespace TicTacToe
             
             ticTacToeTable.ReadOnly = true;
             ticTacToeTable.MultiSelect = false;
-            ticTacToeTable.Location = new Point(5, 50);
+            ticTacToeTable.Location = new Point(5, 55);
             ticTacToeTable.DefaultCellStyle.Font = new Font("Arial", 100);
             ticTacToeTable.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             ticTacToeTable.Size = new Size(tableWidth, tableHeight);
             Controls.Add(ticTacToeTable);
 
             Shown += Form1_Shown1;
-            Size = new Size(tableWidth + 120, tableHeight + 95);
+            Size = new Size(tableWidth + 200, tableHeight + 120);
         }
 
         private void Form1_Shown1(object sender, EventArgs e)
         {
             ticTacToeTable.ClearSelection();
-            ticTacToeTable.SelectionChanged += new EventHandler(CellSelected);
+            gameStatusDisplay.Focus();
+            ticTacToeTable.SelectionChanged += CellSelected;
         }
 
         private void CellSelected(object sender, EventArgs e)
@@ -66,23 +96,50 @@ namespace TicTacToe
 
             if (currentGameState[selectedCell.RowIndex, selectedCell.ColumnIndex] == 0 && !gameOver)
             {
+                gameStarted = true;
                 if (currentTurn == 1)
                 {
                     currentGameState[selectedCell.RowIndex, selectedCell.ColumnIndex] = 1;
                     selectedCell.Value = "X";
                     currentTurn = -1;
-                    gameStatusDisplay.Text = "O's turn.";
+                    gameStatusDisplay.Text = "O's Turn";
                 }
                 else if (currentTurn == -1)
                 {
                     currentGameState[selectedCell.RowIndex, selectedCell.ColumnIndex] = -1;
                     selectedCell.Value = "O";
                     currentTurn = 1;
-                    gameStatusDisplay.Text = "X's turn.";
+                    gameStatusDisplay.Text = "X's Turn";
                 }
 
             }
             CheckGameStatus();
+        }
+
+        private void ResetButtonClicked(object sender, EventArgs e)
+        {
+            gameStatusDisplay.Focus();
+            if (gameOver)
+            {
+                resetButton.Text = "Reset Game";
+                gameOver = !gameOver;
+                if (currentTurn == 1) gameStatusDisplay.Text = "X's Turn";
+                else if (currentTurn == -1) gameStatusDisplay.Text = "O's Turn";
+            }
+            else if (gameStarted)
+            {
+                gameLog.AppendText("Game reset.");
+                IncreaseLog();
+                gameStarted = false;
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    currentGameState[i, j] = 0;
+                    ticTacToeTable.Rows[i].Cells[j].Value = "";
+                }
+            }
         }
 
         private void CheckGameStatus()
@@ -96,18 +153,53 @@ namespace TicTacToe
                 {
                     if (currentTurn == -1)
                     {
-                        MessageBox.Show("X has won.");
+                        lastTenGames.Enqueue(1);
+                        gameStatusDisplay.Text = "X Wins";
+                        gameLog.AppendText("X won the game.");
                     }
                     else if (currentTurn == 1)
                     {
-                        MessageBox.Show("O has won.");
+                        lastTenGames.Enqueue(-1);
+                        gameStatusDisplay.Text = "O Wins";
+                        gameLog.AppendText("O won the game.");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Game tied.");
+                    lastTenGames.Enqueue(0);
+                    gameStatusDisplay.Text = "No One Wins";
+                    gameLog.AppendText("Game ended in a tie.");
                 }
+                IncreaseLog();
+                UpdateGameStats();
+                resetButton.Text = "New Game";
             }
+        }
+
+        private void UpdateGameStats()
+        {
+            int xWins = 0, oWins = 0, ties = 0;
+
+            if (lastTenGames.Count > 10) lastTenGames.Dequeue();
+
+            foreach (int result in lastTenGames)
+            {
+                Console.WriteLine(result);
+                if (result == 1) xWins++;
+                else if (result == -1) oWins++;
+                else if (result == 0) ties++;
+            }
+            
+            gameStats.Text = "Of the last 10 games." + Environment.NewLine + 
+                "X has won " + xWins + " game(s)." + Environment.NewLine + 
+                "O has won " + oWins + " game(s)." + Environment.NewLine + 
+                ties + " game(s) ended in a tie.";
+        }
+
+        private void IncreaseLog()
+        {
+            logCount++;
+            gameLog.AppendText(Environment.NewLine + "[" + logCount + "]: ");
         }
 
         private bool CheckIfWon()
