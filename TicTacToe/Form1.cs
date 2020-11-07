@@ -37,7 +37,7 @@ namespace TicTacToe
 
             gameLog.ReadOnly = true;
             gameLog.Font = new Font("Arial", 10);
-            gameLog.Size = new Size(170, tableHeight - 55);
+            gameLog.Size = new Size(170, tableHeight - 70);
             gameLog.Location = new Point(10 + tableWidth, 55);
             gameLog.Text = "[1]: ";
             gameLog.TextAlign = HorizontalAlignment.Left;
@@ -47,7 +47,7 @@ namespace TicTacToe
             gameStats.ReadOnly = true;
             gameStats.Font = new Font("Arial", 10);
             gameStats.Size = new Size(170, 70);
-            gameStats.Location = new Point(10 + tableWidth, tableHeight);
+            gameStats.Location = new Point(10 + tableWidth, tableHeight - 15);
             UpdateGameStats();
             gameStats.TextAlign = HorizontalAlignment.Left;
             gameStats.Multiline = true;
@@ -80,7 +80,7 @@ namespace TicTacToe
             Controls.Add(ticTacToeTable);
 
             Shown += Form1_Shown1;
-            Size = new Size(tableWidth + 200, tableHeight + 120);
+            Size = new Size(tableWidth + 200, tableHeight + 100);
         }
 
         private void Form1_Shown1(object sender, EventArgs e)
@@ -114,32 +114,6 @@ namespace TicTacToe
 
             }
             CheckGameStatus();
-        }
-
-        private void ResetButtonClicked(object sender, EventArgs e)
-        {
-            gameStatusDisplay.Focus();
-            if (gameOver)
-            {
-                resetButton.Text = "Reset Game";
-                gameOver = !gameOver;
-                if (currentTurn == 1) gameStatusDisplay.Text = "X's Turn";
-                else if (currentTurn == -1) gameStatusDisplay.Text = "O's Turn";
-            }
-            else if (gameStarted)
-            {
-                gameLog.AppendText("Game reset.");
-                IncreaseLog();
-                gameStarted = false;
-            }
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    currentGameState[i, j] = 0;
-                    ticTacToeTable.Rows[i].Cells[j].Value = "";
-                }
-            }
         }
 
         private void CheckGameStatus()
@@ -176,32 +150,6 @@ namespace TicTacToe
             }
         }
 
-        private void UpdateGameStats()
-        {
-            int xWins = 0, oWins = 0, ties = 0;
-
-            if (lastTenGames.Count > 10) lastTenGames.Dequeue();
-
-            foreach (int result in lastTenGames)
-            {
-                Console.WriteLine(result);
-                if (result == 1) xWins++;
-                else if (result == -1) oWins++;
-                else if (result == 0) ties++;
-            }
-            
-            gameStats.Text = "Of the last 10 games." + Environment.NewLine + 
-                "X has won " + xWins + " game(s)." + Environment.NewLine + 
-                "O has won " + oWins + " game(s)." + Environment.NewLine + 
-                ties + " game(s) ended in a tie.";
-        }
-
-        private void IncreaseLog()
-        {
-            logCount++;
-            gameLog.AppendText(Environment.NewLine + "[" + logCount + "]: ");
-        }
-
         private bool CheckIfWon()
         {
             for (int i = 0; i < 3; i++)
@@ -210,7 +158,6 @@ namespace TicTacToe
                 for (int j = 0; j < 2; j++)
                 {
                     if (currentGameState[i, j] == 0) break;
-
                     else if (currentGameState[i, j] == currentGameState[i, j + 1])
                     {
                         fullRow += 1;
@@ -225,7 +172,6 @@ namespace TicTacToe
                 for (int j = 0; j < 2; j++)
                 {
                     if (currentGameState[j, i] == 0) break;
-                    
                     else if (currentGameState[j, i] == currentGameState[j + 1, i])
                     {
                         fullColumn += 1;
@@ -235,7 +181,6 @@ namespace TicTacToe
             }
 
             if (currentGameState[0, 0] != 0 && currentGameState[0, 0] == currentGameState[1, 1] && currentGameState[1, 1] == currentGameState[2, 2]) return true;
-
             if (currentGameState[0, 2] != 0 && currentGameState[0, 2] == currentGameState[1, 1] && currentGameState[1, 1] == currentGameState[2, 0]) return true;
 
             return false;
@@ -252,6 +197,62 @@ namespace TicTacToe
             }
 
             return true;
+        }
+
+        private void ResetButtonClicked(object sender, EventArgs e)
+        {
+            gameStatusDisplay.Focus();
+
+            if (gameStarted)
+            {
+                if (gameOver)
+                {
+                    resetButton.Text = "Reset Game";
+                    gameOver = false;
+                    if (currentTurn == 1) gameStatusDisplay.Text = "X's Turn";
+                    else if (currentTurn == -1) gameStatusDisplay.Text = "O's Turn";
+                }
+                else
+                {
+                    gameLog.AppendText("Game reset.");
+                    IncreaseLog();
+                }
+
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        currentGameState[i, j] = 0;
+                        ticTacToeTable.Rows[i].Cells[j].Value = "";
+                    }
+                }
+                gameStarted = false;
+            }
+        }
+
+        private void IncreaseLog()
+        {
+            logCount++;
+            gameLog.AppendText(Environment.NewLine + "[" + logCount + "]: ");
+        }
+
+        private void UpdateGameStats()
+        {
+            int xWins = 0, oWins = 0, ties = 0;
+
+            if (lastTenGames.Count > 10) lastTenGames.Dequeue();
+
+            foreach (int result in lastTenGames)
+            {
+                if (result == 1) xWins++;
+                else if (result == -1) oWins++;
+                else if (result == 0) ties++;
+            }
+            
+            gameStats.Text = "Of the last 10 games." + Environment.NewLine + 
+                "X has won " + xWins + " game(s)." + Environment.NewLine + 
+                "O has won " + oWins + " game(s)." + Environment.NewLine + 
+                ties + " game(s) ended in a tie.";
         }
     }
 }
