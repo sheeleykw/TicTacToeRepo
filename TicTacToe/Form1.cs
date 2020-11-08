@@ -21,11 +21,11 @@ namespace TicTacToe
         private bool gameOver = false, gameStarted = false, computerMode = false;
 
         public Form1()
-        {
+        { 
             int tableWidth = 550, tableHeight = 465;
-            shortTimer.Interval = 450;
+            shortTimer.Interval = 300;
             shortTimer.Tick += UpdateLabel;
-            longTimer.Interval = 2800;
+            longTimer.Interval = 1200;
             longTimer.Tick += CompleteMove;
 
             computerModeBox.Size = new Size(95, 20);
