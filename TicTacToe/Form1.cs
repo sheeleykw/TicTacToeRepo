@@ -21,7 +21,7 @@ namespace TicTacToe
         private bool gameOver = false, gameStarted = false, computerMode = false;
 
         public Form1()
-        { 
+        {
             int tableWidth = 550, tableHeight = 465;
             shortTimer.Interval = 300;
             shortTimer.Tick += UpdateLabel;
@@ -265,10 +265,14 @@ namespace TicTacToe
             if (bestMove != null) return bestMove;
             bestMove = BestMove(1);
             if (bestMove != null) return bestMove;
-            if (currentGameState[0, 0] == 0) return "0,0";
-            if (currentGameState[0, 2] == 0) return "0,2";
-            if (currentGameState[2, 0] == 0) return "2,0";
-            if (currentGameState[2, 2] == 0) return "2,2";
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (currentGameState[i, j] == 0) return ("" + i + "," + j + "");
+                }
+            }
 
             return "0,0";
         }
