@@ -7,7 +7,7 @@ namespace TicTacToe
 {
     public partial class Form1 : Form
     {
-        //X is represented as 1 and O is represented as -1
+        //X is 1 and O is -1
         private DataGridView ticTacToeTable = new DataGridView();
         private Label gameStatusDisplay = new Label();
         private TextBox gameLog = new TextBox(), gameStats = new TextBox();
@@ -128,6 +128,7 @@ namespace TicTacToe
                 }
             }
 
+            //Keeps cells from staying highlighted, unfortunately this does cause flickering when rapidly selecting cells
             ticTacToeTable.CurrentCell.Selected = false;
         }
 
@@ -203,6 +204,7 @@ namespace TicTacToe
                 if (fullColumn == 2) return true;
             }
 
+            //Check the diagonals
             if (currentGameState[0, 0] != 0 && currentGameState[0, 0] == currentGameState[1, 1] && currentGameState[1, 1] == currentGameState[2, 2]) return true;
             if (currentGameState[0, 2] != 0 && currentGameState[0, 2] == currentGameState[1, 1] && currentGameState[1, 1] == currentGameState[2, 0]) return true;
 
@@ -261,9 +263,9 @@ namespace TicTacToe
         {
             if (currentGameState[1, 1] == 0) return "1,1";
 
-            string bestMove = BestMove(-1);
+            string bestMove = FindBestMove(-1);
             if (bestMove != null) return bestMove;
-            bestMove = BestMove(1);
+            bestMove = FindBestMove(1);
             if (bestMove != null) return bestMove;
 
             for (int i = 0; i < 3; i++)
@@ -274,10 +276,11 @@ namespace TicTacToe
                 }
             }
 
-            return "0,0";
+            //This should never be reached
+            return null;
         }
 
-        private string BestMove(int checkValue)
+        private string FindBestMove(int checkValue)
         {
             int occupiedSpaces;
             string bestMove;
@@ -307,16 +310,26 @@ namespace TicTacToe
                 if (occupiedSpaces == 2 && bestMove != "") return bestMove;
             }
             
-            if (currentGameState[2, 2] == checkValue && currentGameState[1, 1] == checkValue && currentGameState[0, 0] == 0) return "0,0";
-            if (currentGameState[2, 0] == checkValue && currentGameState[1, 1] == checkValue && currentGameState[0, 2] == 0) return "0,2";
-            if (currentGameState[0, 2] == checkValue && currentGameState[1, 1] == checkValue && currentGameState[2, 0] == 0) return "2,0";
-            if (currentGameState[0, 0] == checkValue && currentGameState[1, 1] == checkValue && currentGameState[2, 2] == 0) return "2,2";
+            //Specific game state moves, manually found and entered
+            if (currentGameState[1, 1] == checkValue)
+            {
+                if (currentGameState[2, 2] == checkValue && currentGameState[0, 0] == 0) return "0,0";
+                if (currentGameState[2, 0] == checkValue && currentGameState[0, 2] == 0) return "0,2";
+                if (currentGameState[0, 2] == checkValue && currentGameState[2, 0] == 0) return "2,0";
+                if (currentGameState[0, 0] == checkValue && currentGameState[2, 2] == 0) return "2,2";
+            }
+            if (checkValue == 1)
+            {
+                if (currentGameState[0, 2] == checkValue && currentGameState[2, 0] == checkValue && currentGameState[1, 2] == 0) return "1,2";
+                if (currentGameState[1, 2] == checkValue && currentGameState[2, 1] == checkValue && currentGameState[2, 2] == 0) return "2,2";
+            }
 
             return null;
         }
 
         private void ResetButtonClicked(object sender, EventArgs e)
         {
+            //Removes focus from the button, keeps things pretty
             gameStatusDisplay.Focus();
 
             if (gameStarted)
@@ -327,7 +340,6 @@ namespace TicTacToe
                     gameOver = false;
                     if (currentTurn == 1 && !computerMode) gameStatusDisplay.Text = "X's Turn";
                     else if (currentTurn == -1 && !computerMode) gameStatusDisplay.Text = "O's Turn";
-
                 }
                 else
                 {
