@@ -23,7 +23,7 @@ namespace TicTacToe
         private Timer shortTimer = new Timer(), longTimer = new Timer();
         private Queue lastTenGames = new Queue();
         private int[,] currentGameState = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
-        private int currentTurn = 1, logCount = 1;
+        private int currentTurn = 1, logCount = 1, timerCounter;
         private bool gameOver = false, gameStarted = false, computerMode = false;
 
         public Form1()
