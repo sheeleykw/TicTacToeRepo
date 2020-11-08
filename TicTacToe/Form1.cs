@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Design;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace TicTacToe
@@ -113,6 +107,7 @@ namespace TicTacToe
                 {
                     currentGameState[selectedCell.RowIndex, selectedCell.ColumnIndex] = 1;
                     selectedCell.Value = "X";
+                    selectedCell.Style = new DataGridViewCellStyle { ForeColor = Color.Orange };
                     currentTurn = -1;
                     if (!computerMode) gameStatusDisplay.Text = "O's Turn";
                 }
@@ -120,6 +115,7 @@ namespace TicTacToe
                 {
                     currentGameState[selectedCell.RowIndex, selectedCell.ColumnIndex] = -1;
                     selectedCell.Value = "O";
+                    selectedCell.Style = new DataGridViewCellStyle { ForeColor = Color.Black };
                     currentTurn = 1;
                     gameStatusDisplay.Text = "X's Turn";
                 }
@@ -252,7 +248,9 @@ namespace TicTacToe
 
             string move = NextMove();
             currentGameState[Int32.Parse(move.Split(",")[0]), Int32.Parse(move.Split(",")[1])] = -1;
-            ticTacToeTable.Rows[Int32.Parse(move.Split(",")[0])].Cells[Int32.Parse(move.Split(",")[1])].Value = "O";
+            DataGridViewCell cell = ticTacToeTable.Rows[Int32.Parse(move.Split(",")[0])].Cells[Int32.Parse(move.Split(",")[1])];
+            cell.Value = "O";
+            cell.Style = new DataGridViewCellStyle { ForeColor = Color.Black };
 
             currentTurn = 1;
             gameStatusDisplay.Text = "Player's Turn";
