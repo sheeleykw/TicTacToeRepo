@@ -23,7 +23,7 @@ namespace TicTacToe
         private Timer shortTimer = new Timer(), longTimer = new Timer();
         private Queue lastTenGames = new Queue();
         private int[,] currentGameState = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
-        private int currentTurn = 1, logCount = 1, timerCounter;
+        private int currentTurn = 1, logCount = 1;
         private bool gameOver = false, gameStarted = false, computerMode = false;
 
         public Form1()
@@ -126,7 +126,6 @@ namespace TicTacToe
                 CheckGameStatus();
                 if (computerMode && currentTurn == -1 && !gameOver)
                 {
-                    Console.WriteLine("Start timers");
                     shortTimer.Start();
                     longTimer.Start();
                     timerCounter = 1;
